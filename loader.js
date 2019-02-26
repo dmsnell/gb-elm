@@ -22,7 +22,12 @@ class Edit extends React.Component {
         } );
 
         this.app.ports.setAttributes.subscribe(
-            elmProps => this.props.setAttributes( { elmProps } )
+            elmProps => {
+                this.props.setAttributes( { elmProps } );
+                this.saveApp.ports.externalUpdate.send( {
+                    attributes: elmProps
+                } );
+            }
         );
 
         this.saveApp = Elm.Main.init( {
@@ -40,9 +45,12 @@ class Edit extends React.Component {
         } );
 
         this.observer.observe(
-            this.saveNode,
+            this.node.current,
             { attributes: true, childList: true, subtree: true }
         );
+
+        this.app.ports.externalUpdate.send( { isSelected: ! this.props.isSelected } );
+        this.app.ports.externalUpdate.send( { isSelected: this.props.isSelected } );
     }
 
     componentDidUpdate( prev ) {

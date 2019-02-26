@@ -49,6 +49,11 @@ class Edit extends React.Component {
             { attributes: true, childList: true, subtree: true }
         );
 
+        this.observer.observe(
+            this.saveNode,
+            { attributes: true, childList: true, subtree: true }
+        );
+
         this.app.ports.externalUpdate.send( { isSelected: ! this.props.isSelected } );
         this.app.ports.externalUpdate.send( { isSelected: this.props.isSelected } );
     }

@@ -3,7 +3,7 @@
 I'm exploring possible ways to create blocks in Elm.
 This repo contains some basic material and API translation to make that happen.
 
-![](https://cldup.com/so6ikZ37mN.gif)
+![](https://user-images.githubusercontent.com/5431237/53447069-a32b9000-39d1-11e9-8ec0-a5cf784a2c22.gif)
 
 ## Operation
 

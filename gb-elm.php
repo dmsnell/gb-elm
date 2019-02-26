@@ -19,7 +19,7 @@ add_action( 'init', function() {
     wp_register_script(
         'dmsnell-gb-elm-loader',
         plugins_url( 'loader.js', __FILE__ ),
-        [ 'dmsnell-gb-elm', 'wp-element', 'wp-blocks' ]
+        [ 'dmsnell-gb-elm', 'wp-element', 'wp-blocks', 'wp-editor' ]
     );
 
     register_block_type( 'dmsnell/basic-elm-block', [

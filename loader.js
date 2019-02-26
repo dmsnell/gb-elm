@@ -1,11 +1,15 @@
 const el = wp.element.createElement;
 const registerBlockType = wp.blocks.registerBlockType;
+const RichText = wp.editor.RichText;
 
 class Edit extends React.Component {
     constructor( ...args ) {
         super( ...args );
 
         this.node = React.createRef();
+
+        this.forceNoSelected = this.forceNoSelected.bind( this );
+        this.restoreSelected = this.restoreSelected.bind( this );
     }
 
     componentDidMount() {
@@ -21,6 +25,15 @@ class Edit extends React.Component {
 
         this.app.ports.setAttributes.subscribe(
             elmProps => this.props.setAttributes( { elmProps } )
+        );
+
+        this.observer = new MutationObserver( () => {
+            this.props.setAttributes( { content: this.node.current.innerHTML } );
+        } );
+
+        this.observer.observe(
+            this.node.current,
+            { attributes: true, childList: true, subtree: true }
         );
     }
 
@@ -44,12 +57,29 @@ class Edit extends React.Component {
     }
 
     componentWillUnmount() {
+        this.observer.disconnect();
         delete this.app;
         delete this.node;
     }
 
+    forceNoSelected() {
+        this.app.ports.externalUpdate.send( { isSelected: false } );
+    };
+
+    restoreSelected() {
+        this.app.ports.externalUpdate.send( { isSelected: this.props.isSelected } )
+    }
+
     render() {
-        return el( 'div', { ref: this.node } );
+        return el( 'div',
+            {
+                onMouseEnter: this.restoreSelected,
+                onMouseLeave: this.forceNoSelected
+            }, 
+            el( 'div', { ref: this.node },
+                el( RichText, { value: this.props.attributes.content } )
+            )
+        );
     }
 }
 
@@ -58,10 +88,19 @@ registerBlockType( 'dmsnell/basic-elm-block', {
     icon: 'layout',
     category: 'layout',
     attributes: {
+        content: {
+            type: 'string',
+            source: 'html',
+            selector: 'div',
+            default: ''
+        },
         elmProps: {
             type: 'object'
         }
     },
+    supports: {
+        html: false
+    },
     edit: Edit,
-    save: Edit
+    save: props => el( 'div', { className: props.className }, el( RichText.Content, { value: props.attributes.content } ) )
 } );

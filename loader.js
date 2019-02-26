@@ -7,9 +7,7 @@ class Edit extends React.Component {
         super( ...args );
 
         this.node = React.createRef();
-
-        this.forceNoSelected = this.forceNoSelected.bind( this );
-        this.restoreSelected = this.restoreSelected.bind( this );
+        this.saveNode = document.createElement( 'div' );
     }
 
     componentDidMount() {
@@ -27,12 +25,22 @@ class Edit extends React.Component {
             elmProps => this.props.setAttributes( { elmProps } )
         );
 
+        this.saveApp = Elm.Main.init( {
+            node: this.saveNode,
+            flags: {
+                attributes: this.props.attributes.elmProps,
+                className: this.props.className,
+                isSelected: false,
+                name: this.props.name 
+            }
+        } );
+
         this.observer = new MutationObserver( () => {
-            this.props.setAttributes( { content: this.node.current.innerHTML } );
+            this.props.setAttributes( { content: this.saveNode.innerHTML } );
         } );
 
         this.observer.observe(
-            this.node.current,
+            this.saveNode,
             { attributes: true, childList: true, subtree: true }
         );
     }
@@ -53,6 +61,14 @@ class Edit extends React.Component {
                 newIsSelected && { isSelected: this.props.isSelected },
                 newName && { name: this.props.name }
             ) );
+
+            this.saveApp.ports.externalUpdate.send( Object.assign(
+                {},
+                newProps && { attributes: this.props.attributes.elmProps },
+                newClassName && { className: this.props.className },
+                newIsSelected && { isSelected: false },
+                newName && { name: this.props.name }
+            ) );
         }
     }
 
@@ -60,25 +76,13 @@ class Edit extends React.Component {
         this.observer.disconnect();
         delete this.app;
         delete this.node;
-    }
-
-    forceNoSelected() {
-        this.app.ports.externalUpdate.send( { isSelected: false } );
-    };
-
-    restoreSelected() {
-        this.app.ports.externalUpdate.send( { isSelected: this.props.isSelected } )
+        delete this.saveApp;
+        delete this.saveNode;
     }
 
     render() {
-        return el( 'div',
-            {
-                onMouseEnter: this.restoreSelected,
-                onMouseLeave: this.forceNoSelected
-            }, 
-            el( 'div', { ref: this.node },
-                el( RichText, { value: this.props.attributes.content } )
-            )
+        return el( 'div', { ref: this.node },
+            el( RichText, { value: this.props.attributes.content } )
         );
     }
 }

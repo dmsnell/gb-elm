@@ -3,6 +3,8 @@
 I'm exploring possible ways to create blocks in Elm.
 This repo contains some basic material and API translation to make that happen.
 
+![](https://cldup.com/so6ikZ37mN.gif)
+
 ## Operation
 
 We are wrapping the JavaScript Block API given to us from the Gutenberg Block Editor and passing that in and out of our inner Elm block app.
